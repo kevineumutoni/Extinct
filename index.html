@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Evolve or Extinct - Card Game</title>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh; min-width: 100vw;
+      font-family: Arial, sans-serif;
+      background: #1a3d1a; color: #f1f1f1;
+      background-image: url(images/anima.jpg);
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    }
+    h1, h2, h3 { color: #ffe066; text-shadow: 1px 2px 8px #000a; }
+    main { flex: 1 1 auto; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .container {
+      background: rgba(20,40,20,0.93); border-radius: 18px; box-shadow: 0 8px 32px #0007;
+      max-width: 470px; margin: 2em auto; padding: 2em 2em 2.5em 2em; text-align: center; position: relative;
+    }
+    .welcome-title { font-size: 2.2em; font-weight: bold; color: #ffe066; margin-bottom: 0.5em; text-shadow: 1px 2px 8px #000a; }
+    .logo-img { width: 110px; height: 110px; object-fit: cover; border-radius: 16px; box-shadow: 0 2px 14px #0008; margin-bottom: 1.1em; border: 4px solid #ffe066; background: #fff; }
+    .intro { font-size: 1.08em; margin: 1em 0 1.5em 0; color: #fffbe6; }
+    #readmore {
+      background: #ffe066; color: #1a3d1a; font-weight: bold; border: none; border-radius: 7px;
+      padding: 0.55em 1.2em; font-size: 1.1em; cursor: pointer; box-shadow: 0 2px 8px #154;
+      margin-bottom: 1.2em; margin-top: 0.5em;
+    }
+    #rulebook {
+      background: #fffbe6; color: #222; text-align: left; border-radius: 10px; padding: 1.2em 1.1em;
+      margin-top: 1em; margin-bottom: 1em; font-size: 1em; line-height: 1.5; display: none;
+      box-shadow: 0 2px 12px #0004; max-height: 350px; overflow-y: auto;
+    }
+    .section { margin: 1.2em 0 0.8em 0; }
+    form { margin-top: 2.2em; margin-bottom: 0.5em; }
+    label { display: block; font-size: 1.04em; margin-bottom: 0.9em; color: #ffe066; font-weight: bold; letter-spacing: 0.02em; }
+    input[type="text"] { width: 80%; padding: 0.6em 1em; border-radius: 7px; border: none; font-size: 1.08em; margin-bottom: 1em; margin-top: 0.2em; box-shadow: 0 1px 7px #0005; }
+    .play-options { margin-top: 0.5em; margin-bottom: 1.5em; }
+    .play-options button {
+      margin: 0.2em 0.6em; background: #2ecc40; color: #fff; font-weight: bold; border: none; border-radius: 7px;
+      font-size: 1.1em; padding: 0.5em 1.3em; box-shadow: 0 2px 8px #154;
+      cursor: pointer; transition: background 0.16s;
+    }
+    .play-options button[disabled] { background: #888; color: #ddd; cursor: not-allowed; }
+    .credit-footer {
+      width: 100vw; background: #142916; color: #ffe066; text-align: center; font-size: 1.1em;
+      padding: 1.1em 0 0.6em 0; position: relative; bottom: 0; left: 0; font-family: 'Georgia', serif; letter-spacing: 0.01em;
+    }
+    #imgUpload { margin-bottom: 1em; color: #ffe066; background: #142916; border: 1px solid #ffe066; border-radius: 7px; font-size: 1em; padding: 0.3em; }
+    #game, #step1 {
+      width: 100%; max-width: 900px; margin: 0 auto; background: rgba(20,40,20,0.9); border-radius: 16px;
+      box-shadow: 0 10px 30px #0008; padding: 2em; margin-top: 2em;
+    }
+    .pile, .hand { margin: 2em 0; display: flex; flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 2em; }
+    .pile { min-height: 260px; align-items: flex-start; }
+    .hand { min-height: 260px; align-items: flex-end; }
+    .card, .trade-card {
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      border: 3px solid #333; border-radius: 15px; background: linear-gradient(155deg, #fff 80%, #e8f5e9 100%);
+      color: #222; box-shadow: 0 8px 22px #0006; width: 210px; height: 310px; font-size: 1.1em;
+      font-family: 'Georgia', serif; padding: 1em 0.7em 0.8em 0.7em; margin: 0.3em; transition: box-shadow 0.2s, border 0.2s, transform 0.15s;
+      cursor: pointer; position: relative; z-index: 1; box-sizing: border-box; overflow: hidden; background-clip: padding-box;
+    }
+    .trade-card { border: 3px solid #888; background: #e3ffe9; }
+    .card.selected, .trade-card.selected { border: 4px solid #2ecc40; box-shadow: 0 0 16px #6f6; transform: scale(1.08) rotate(-3deg); z-index: 2; }
+    .danger { background: linear-gradient(160deg,#ffeaea 80%, #ffebee 100%); border: 4px solid #b00; color: #b00; font-weight: bold; box-shadow: 0 0 15px #a00b; }
+    .danger img { filter: none; }
+    .hidden { display: none; }
+    .token { font-weight: bold; color: #ffe066;}
+    .card-content, .trade-card-content { flex: 1 1 auto; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; overflow: hidden; }
+    .card img, .trade-card img { width: 78px; height: 78px; object-fit: contain; display: block; margin-bottom: 0.5em; margin-top: 0.5em; filter: drop-shadow(0 2px 4px #aaa3); flex-shrink: 0; }
+    .card .card-desc, .trade-card .card-desc { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; min-height: 3.2em; max-height: 3.2em; margin: 0.5em 0; font-size: 0.94em; color: #444; }
+    .card .card-tip, .trade-card .card-tip { font-size: 0.96em; color: #1a3d1a; background: #ffe066; border-radius: 6px; padding: 2px 7px 2px 7px; display: inline-block; font-weight: bold; margin-top: 0.35em; margin-bottom: 0.2em; white-space: normal; min-height: 1.5em; max-width: 90%; overflow: hidden; text-overflow: ellipsis; }
+    #dangerSection { margin-top: 2em; display: flex; flex-direction: column; align-items: center; }
+    #dangerCard { margin-bottom: 1.3em; margin-top: 0.8em; font-size: 1.2em; min-width: 220px; min-height: 260px; }
+    #restartBtn { margin-top: 2em; background: #ffe066; color: #1a3d1a; border: 2px solid #1a3d1a; font-size: 1.2em; }
+    #traitPile { justify-content: center; align-items: flex-end; }
+    #dangerPile { justify-content: center; align-items: flex-start; }
+    #tradeSection { margin: 2em 0; background: #fff6; border-radius: 10px; padding: 2em 1em; display: flex; flex-direction: column; align-items: center; }
+    #tradeTimer { color: #b00; font-size: 2em; font-weight: bold; margin-bottom: 1em; }
+    .trade-card-list { display: flex; flex-wrap: wrap; gap: 1em; margin-bottom: 1em; }
+    @media (max-width: 540px) {
+      .container { max-width: 99vw; padding: 1.4em 0.4em; }
+      .logo-img { width: 70px; height: 70px; }
+      #rulebook { font-size: 0.97em; }
+      .card, .trade-card { width: 110px!important; height: 165px!important; font-size: 0.81em; }
+      .card img, .trade-card img { width: 38px; height: 38px; }
+    }
+    /* BUTTONS IN GAME */
+    #saveTraitsBtn, #restartBtn, #resolveBtn, #confirmTradeBtn, #hand button, #dangerSection button {
+      display: inline-block;
+      margin: 1em 0.5em 0.5em 0.5em;
+      font-size: 1.13em;
+      padding: 0.5em 1.6em;
+      border-radius: 7px;
+      border: none;
+      background: #2ecc40;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #154;
+      transition: background 0.16s;
+    }
+    #saveTraitsBtn:disabled, #resolveBtn:disabled, #confirmTradeBtn:disabled { background: #888; color: #ddd; cursor: not-allowed; }
+    #restartBtn { background: #ffe066; color: #1a3d1a; border: 2px solid #1a3d1a; }
+  </style>
+</head>
+<body>
+  <main id="landingMain">
+    <div class="container" id="landingContainer">
+      <div class="welcome-title">Welcome to Evolve or Extinct!</div>
+      <img src="your-image.jpg" alt="Game logo" class="logo-img" id="gameLogo" />
+      <input type="file" id="imgUpload" accept="image/*" title="Upload your logo/image" />
+      <div class="intro">
+        A thrilling card game of adaptation and survival!<br>
+        In a world assailed by disasters, resource scarcity, and predators, only the most adaptable will endure.<br>
+        <span style="color:#ffe066;"><b>Be the last survivor!</b></span>
+      </div>
+      <button id="readmore" onclick="toggleRulebook()">Read Rule Book</button>
+      <div id="rulebook">
+        <b>Game Story:</b> Welcome to Evolve or Extinct!, a thrilling card game of adaptation and survival! In a world constantly assailed by environmental disasters, resource scarcity, and predatory threats, only the most adaptable species will endure. You are an animal, a unique creature with inherent strengths, battling against the relentless forces of nature and the cunning of your rivals.<br><br>
+        <b>Objective:</b> Be the Last Survivor! The game ends when only one player has at least one Life Token remaining. That player's species has successfully evolved and outlasted all others.<br>
+        <div class="section">
+          <b>How to Play: Turn Structure & Actions</b><br>
+          <ul>
+            <li><b>Draw Danger:</b> Draw the top card from the Danger Deck and read it aloud.</li>
+            <li><b>Resolve Danger:</b>
+              <ul>
+                <li><b>Countering:</b> Play Trait Cards to counter the danger. Discard them if used.</li>
+                <li><b>No Counter:</b> Lose 1 Life Token if you cannot counter. Discard the Danger Card.</li>
+                <li><b>Danger Card Effects:</b> Some dangers have extra effects if not countered (e.g., skip actions, chained dangers).</li>
+              </ul>
+            </li>
+            <li><b>Evolutionary Action (Optional):</b> Once per turn, choose one:
+              <ul>
+                <li>Buy Traits: Spend 2 Evolution Tokens to draw 1 Trait Card.</li>
+                <li>Accelerate Evolution: Spend 4 Evolution Tokens to draw 2 Trait Cards.</li>
+                <li>Resilient Will: Spend 5 Evolution Tokens to regain 1 Life Token.</li>
+                <li>Evolutionary Pressure: Once per game, spend 3 Evolution Tokens to force another player to resolve a Danger Card immediately.</li>
+              </ul>
+            </li>
+            <li><b>Trade Phase (Optional):</b> Trade Trait Cards or Evolution Tokens with others (one trade per player per turn).</li>
+            <li><b>Replenish Hand:</b> Draw up to 3 Trait Cards if below hand size. Max hand is 5.</li>
+            <li><b>Animal Unique Ability:</b> If your Animal Card has an end of turn ability, use it now.</li>
+          </ul>
+        </div>
+      </div>
+      <form autocomplete="off" id="teamForm">
+        <label for="teamName">What's your team's name?</label>
+        <input type="text" id="teamName" required placeholder="Enter your team name..." />
+        <div class="play-options">
+          <button type="submit">Play Alone</button>
+          <button type="button" disabled title="Coming soon!">Play with Other Teams</button>
+        </div>
+      </form>
+    </div>
+  </main>
+  <div class="credit-footer">
+    Presented by The Big Minds Team from AkiraChix<br>
+    &copy; <span id="year"></span> The Big Minds Team. All rights reserved.
+  </div>
+  <div id="game" class="hidden">
+    <div>Player: <span id="playerDisplay"></span> | Life Tokens: <span id="lifeDisplay" class="token"></span></div>
+    <h2>Pick 2 Trait Cards:</h2>
+    <div id="traitPile" class="pile"></div>
+    <button id="saveTraitsBtn" onclick="saveTraits()" disabled>Save Traits</button>
+    <div id="hand" class="hand hidden">
+      <h3>Your Traits:</h3>
+      <div id="playerHand"></div>
+      <button onclick="drawDanger()">Draw Danger Card</button>
+    </div>
+    <div id="dangerSection" class="hidden">
+      <h3>Danger Card:</h3>
+      <div id="dangerCard" class="card danger"></div>
+      <button id="resolveBtn" onclick="resolve()">Resolve</button>
+    </div>
+    <div id="tradeSection" class="hidden">
+      <div id="tradeTimer"></div>
+      <div>Trade 1 life token for 2 new trait cards! Pick 2:</div>
+      <div id="tradeTraitList" class="trade-card-list"></div>
+      <button id="confirmTradeBtn" onclick="confirmTrade()" disabled>Trade Now</button>
+    </div>
+    <div id="resultSection" class="hidden"></div>
+    <button id="restartBtn" onclick="restartGame()" class="hidden">Restart</button>
+  </div>
+  <script>
+    function toggleRulebook() {
+      const rb = document.getElementById('rulebook');
+      const btn = document.getElementById('readmore');
+      if (rb.style.display === 'block') {
+        rb.style.display = 'none';
+        btn.textContent = 'Read Rule Book';
+      } else {
+        rb.style.display = 'block';
+        btn.textContent = 'Hide Rule Book';
+      }
+    }
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Handle image upload
+    document.getElementById('imgUpload').addEventListener('change', function(ev) {
+      const file = ev.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('gameLogo').src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('teamForm').onsubmit = function(e) {
+      e.preventDefault();
+      const teamName = document.getElementById('teamName').value.trim();
+      if (!teamName) { alert("Please enter your team's name!"); return; }
+      startGame(teamName);
+    };
+
+    // --- GAME LOGIC ---
+    const DANGER_CARDS = [
+      {
+        name: "Flash Flood",
+        type: "Standard",
+        effect: "Lose 1 Life Token.",
+        description: "A sudden torrent roars through the valley, sweeping away the unwary. Only the swiftest and strongest swimmers stand a chance.",
+        countered_by: ["Strong Swimmer", "Acrobatic"],
+        img: "https://gasdetection.com/app/uploads/2024/02/danger.jpg"
+      },
+      {
+        name: "Toxic Algae Bloom",
+        type: "Consequence",
+        effect: "Lose 1 Life Token. All 'Foraging' actions are at -2 penalty for 1 turn.",
+        description: "The water glows an eerie green. Feeding here could be a fatal mistake, and those who survive find food scarce and dangerous.",
+        countered_by: ["Filtration System", "Iron Gut"],
+        img: "https://gasdetection.com/app/uploads/2024/02/danger.jpg"
+      },
+      {
+        name: "Landslide",
+        type: "Chained",
+        effect: "Lose 1 Life Token. THEN, immediately draw and resolve one 'River Delta Blockage' Danger card.",
+        description: "The ground trembles and boulders rain down. Escape is nearly impossible, and the river is blocked, threatening more disaster.",
+        countered_by: ["Rock Climbing", "Alert Senses"],
+        img: "https://gasdetection.com/app/uploads/2024/02/danger.jpg"
+      },
+      {
+        name: "Apex Predator Overpopulation",
+        type: "Global",
+        effect: "All players are targeted. If not countered collectively, all lose 1 Life Token.",
+        description: "The balance is broken. Apex predators are everywhere. Only by working together can prey species hope to survive the onslaught.",
+        countered_by: ["Collective Defense", "Apex Counter-Instinct"],
+        img: "https://gasdetection.com/app/uploads/2024/02/danger.jpg"
+      },
+      {
+        name: "Sudden Drought",
+        type: "Consequence",
+        effect: "Lose 1 Life Token. Cannot play any 'Resource Gathering' Traits next turn.",
+        description: "The rivers have dried, plants wither, and thirst stalks the land. Survival is for those who planned ahead.",
+        countered_by: ["Water Storage", "Desert Survivalist"],
+        img: "https://gasdetection.com/app/uploads/2024/02/danger.jpg"
+      }
+    ];
+
+    const TRAIT_CARDS = [
+      {
+        name: "Strong Swimmer",
+        category: "Survival",
+        story: "Your muscles ripple with power, propelling you through raging currents that would defeat weaker creatures.",
+        tip: "Counters floods and river perils.",
+        img: "https://cdn-icons-png.flaticon.com/128/616/616408.png"
+      },
+      {
+        name: "Filtration System",
+        category: "Adaptation",
+        story: "Your body filters out toxins with ease, letting you drink and eat where others dare not.",
+        tip: "Vital for surviving polluted waters and toxic blooms.",
+        img: "https://cdn-icons-png.flaticon.com/128/3159/3159066.png"
+      },
+      {
+        name: "Rock Climbing",
+        category: "Mobility",
+        story: "Sheer cliffs and sliding rocks are no match for your deft, gripping limbs.",
+        tip: "Essential when nature turns the ground against you.",
+        img: "https://cdn-icons-png.flaticon.com/128/685/685686.png"
+      },
+      {
+        name: "Collective Defense",
+        category: "Social",
+        story: "Your species bands together at the first sign of threat, presenting a wall of horns, claws, or courage.",
+        tip: "Best for global disasters, but useless if you stand alone.",
+        img: "https://cdn-icons-png.flaticon.com/128/1077/1077012.png"
+      },
+      {
+        name: "Water Storage",
+        category: "Resourceful",
+        story: "You can carry enough water to last through the longest droughts. Dehydration is never a problem for you.",
+        tip: "A must-have for surviving sudden droughts.",
+        img: "https://cdn-icons-png.flaticon.com/128/616/616495.png"
+      },
+      {
+        name: "Acrobatic",
+        category: "Mobility",
+        story: "You leap and twist with ease, making quick escapes from danger.",
+        tip: "Useful against predators and sudden floods.",
+        img: "https://cdn-icons-png.flaticon.com/128/1077/1077012.png"
+      }
+    ];
+
+    let player = { name: "", life: 3 };
+    let pickedTraits = [];
+    let hand = [];
+    let danger = null;
+    let tradeTimer = null;
+    let tradeTimeLeft = 10;
+    let tradePicked = [];
+
+    function showGame(teamName) {
+      document.getElementById('landingMain').style.display = "none";
+      document.getElementById('game').classList.remove('hidden');
+      document.getElementById('playerDisplay').textContent = teamName;
+      document.getElementById('lifeDisplay').textContent = player.life;
+      renderTraitPile();
+      document.getElementById('resultSection').classList.add('hidden');
+      document.getElementById('restartBtn').classList.add('hidden');
+    }
+
+    function startGame(teamName) {
+      player.name = teamName;
+      player.life = 3;
+      pickedTraits = [];
+      hand = [];
+      danger = null;
+      showGame(teamName);
+    }
+
+    function renderTraitPile() {
+      const pile = document.getElementById('traitPile');
+      pile.innerHTML = "";
+      pickedTraits = [];
+      TRAIT_CARDS.forEach((card, idx) => {
+        const c = document.createElement('div');
+        c.className = "card";
+        c.innerHTML = `
+          <img src="${card.img}" alt="${card.name} image">
+          <div class="card-content">
+            <b style="color:#2ecc40">${card.category}</b>
+            <div style="font-size:1.15em;font-weight:bold;">${card.name}</div>
+            <div class="card-desc"><i>${card.story}</i></div>
+            <div class="card-tip">${card.tip}</div>
+          </div>
+        `;
+        c.onclick = () => pickTrait(idx, c);
+        pile.appendChild(c);
+      });
+      document.getElementById('saveTraitsBtn').disabled = true;
+      document.getElementById('hand').classList.add('hidden');
+      document.getElementById('dangerSection').classList.add('hidden');
+      document.getElementById('tradeSection').classList.add('hidden');
+    }
+
+    function pickTrait(idx, element) {
+      if (pickedTraits.includes(idx)) {
+        pickedTraits = pickedTraits.filter(i => i !== idx);
+        element.classList.remove('selected');
+      } else if (pickedTraits.length < 2) {
+        pickedTraits.push(idx);
+        element.classList.add('selected');
+      }
+      document.getElementById('saveTraitsBtn').disabled = pickedTraits.length !== 2;
+    }
+
+    function saveTraits() {
+      hand = pickedTraits.map(idx => TRAIT_CARDS[idx]);
+      document.getElementById('hand').classList.remove('hidden');
+      renderHand();
+      document.getElementById('traitPile').innerHTML = "";
+      document.getElementById('saveTraitsBtn').disabled = true;
+    }
+
+    function renderHand() {
+      const handDiv = document.getElementById('playerHand');
+      handDiv.innerHTML = "";
+      hand.forEach(card => {
+        const c = document.createElement('div');
+        c.className = "card";
+        c.innerHTML = `
+          <img src="${card.img}" alt="${card.name} image">
+          <div class="card-content">
+            <b style="color:#2ecc40">${card.category}</b>
+            <div style="font-size:1.15em;font-weight:bold;">${card.name}</div>
+            <div class="card-desc"><i>${card.story}</i></div>
+            <div class="card-tip">${card.tip}</div>
+          </div>
+        `;
+        handDiv.appendChild(c);
+      });
+    }
+
+    function drawDanger() {
+      danger = DANGER_CARDS[Math.floor(Math.random() * DANGER_CARDS.length)];
+      document.getElementById('dangerCard').innerHTML =
+        `<img src="${danger.img}" alt="${danger.name} image">
+         <div class="card-content">
+           <b style="color:#b00">${danger.type}</b>
+           <div style="font-size:1.11em;font-weight:bold;">${danger.name}</div>
+           <div style="font-size:0.95em;color:#b00;font-weight:bold;margin-top:0.5em;">${danger.effect}</div>
+           <div class="card-desc">${danger.description}</div>
+         </div>`;
+      document.getElementById('dangerSection').classList.remove('hidden');
+      document.getElementById('resultSection').classList.add('hidden');
+      document.getElementById('restartBtn').classList.add('hidden');
+      document.getElementById('tradeSection').classList.add('hidden');
+      document.getElementById('resolveBtn').disabled = false;
+    }
+
+    function resolve() {
+      const survives = hand.some(card => danger.countered_by.includes(card.name));
+      let resultDiv = document.getElementById('resultSection');
+      resultDiv.classList.remove('hidden');
+      if (survives) {
+        resultDiv.innerHTML = `<h3 style="color:green">You survived the danger!</h3>`;
+        document.getElementById('restartBtn').classList.remove('hidden');
+        document.getElementById('resolveBtn').disabled = true;
+      } else {
+        if (player.life > 0) {
+          offerTrade();
+        } else {
+          resultDiv.innerHTML = `<h3 style="color:red">Game Over!</h3>`;
+          document.getElementById('restartBtn').classList.remove('hidden');
+          document.getElementById('resolveBtn').disabled = true;
+        }
+      }
+    }
+
+    function offerTrade() {
+      document.getElementById('tradeSection').classList.remove('hidden');
+      document.getElementById('dangerSection').classList.add('hidden');
+      document.getElementById('resultSection').classList.add('hidden');
+      tradePicked = [];
+      renderTradeCards();
+      document.getElementById('confirmTradeBtn').disabled = true;
+      tradeTimeLeft = 10;
+      updateTradeTimer();
+      tradeTimer = setInterval(() => {
+        tradeTimeLeft -= 1;
+        updateTradeTimer();
+        if (tradeTimeLeft <= 0) {
+          clearInterval(tradeTimer);
+          tradeTimer = null;
+          failTrade();
+        }
+      }, 1000);
+    }
+
+    function renderTradeCards() {
+      const tradeDiv = document.getElementById('tradeTraitList');
+      tradeDiv.innerHTML = "";
+      TRAIT_CARDS.forEach((card, idx) => {
+        const c = document.createElement('div');
+        c.className = "trade-card";
+        c.innerHTML = `
+          <img src="${card.img}" alt="${card.name} image">
+          <div class="trade-card-content">
+            <b style="color:#2ecc40">${card.category}</b>
+            <div style="font-size:1.04em;font-weight:bold;">${card.name}</div>
+            <div class="card-desc"><i>${card.story}</i></div>
+            <div class="card-tip">${card.tip}</div>
+          </div>
+        `;
+        c.onclick = () => pickTradeTrait(idx, c);
+        tradeDiv.appendChild(c);
+      });
+    }
+
+    function pickTradeTrait(idx, element) {
+      if (tradePicked.includes(idx)) {
+        tradePicked = tradePicked.filter(i => i !== idx);
+        element.classList.remove('selected');
+      } else if (tradePicked.length < 2) {
+        tradePicked.push(idx);
+        element.classList.add('selected');
+      }
+      document.getElementById('confirmTradeBtn').disabled = tradePicked.length !== 2;
+    }
+
+    function updateTradeTimer() {
+      document.getElementById('tradeTimer').textContent = `Time left: ${tradeTimeLeft}`;
+    }
+
+    function confirmTrade() {
+      clearInterval(tradeTimer);
+      tradeTimer = null;
+      player.life -= 1;
+      document.getElementById('lifeDisplay').textContent = player.life;
+      hand = tradePicked.map(idx => TRAIT_CARDS[idx]);
+      renderHand();
+      document.getElementById('tradeSection').classList.add('hidden');
+      document.getElementById('dangerSection').classList.remove('hidden');
+      document.getElementById('resolveBtn').disabled = false;
+      setTimeout(() => {
+        const survives = hand.some(card => danger.countered_by.includes(card.name));
+        let resultDiv = document.getElementById('resultSection');
+        resultDiv.classList.remove('hidden');
+        if (survives) {
+          resultDiv.innerHTML = `<h3 style="color:green">You survived the danger after trading!</h3>`;
+        } else {
+          if (player.life > 0) {
+            resultDiv.innerHTML = `<h3 style="color:red">Still not enough! You lost a life token. Try again?</h3>`;
+          } else {
+            resultDiv.innerHTML = `<h3 style="color:red">Game Over!</h3>`;
+          }
+        }
+        document.getElementById('restartBtn').classList.remove('hidden');
+        document.getElementById('resolveBtn').disabled = true;
+      }, 300);
+    }
+
+    function failTrade() {
+      player.life -= 1;
+      document.getElementById('lifeDisplay').textContent = player.life;
+      document.getElementById('tradeSection').classList.add('hidden');
+      let resultDiv = document.getElementById('resultSection');
+      resultDiv.classList.remove('hidden');
+      if (player.life > 0) {
+        resultDiv.innerHTML = `<h3 style="color:red">Time's up! You lost a life token. Try again?</h3>`;
+      } else {
+        resultDiv.innerHTML = `<h3 style="color:red">Game Over!</h3>`;
+      }
+      document.getElementById('restartBtn').classList.remove('hidden');
+      document.getElementById('resolveBtn').disabled = true;
+    }
+
+    function restartGame() {
+      if (tradeTimer) clearInterval(tradeTimer);
+      player.life = 3;
+      document.getElementById('lifeDisplay').textContent = player.life;
+      renderTraitPile();
+      document.getElementById('hand').classList.add('hidden');
+      document.getElementById('dangerSection').classList.add('hidden');
+      document.getElementById('resultSection').classList.add('hidden');
+      document.getElementById('restartBtn').classList.add('hidden');
+      document.getElementById('tradeSection').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
